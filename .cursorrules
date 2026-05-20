@@ -1,0 +1,305 @@
+################################################################################
+project:
+  name: unit_converter_11
+  language: cpp
+  standard: c++17
+  description: Length unit converter with OCP/SRP, external config, dynamic registration, multi-format output
+  docs:
+    prd: docs/PRD.md
+    todo: docs/TODO.md
+    readme: README.md
+  base_unit: meter
+  builtin_units:
+    - meter
+    - feet
+    - yard
+  conversion_constants:
+    meter_to_feet: 3.28084
+    meter_to_yard: 1.09361
+  input_format: "unit:value"
+  register_format: "register:{unit}:{factor_to_meter}"
+  output_formats:
+    - table
+    - json
+    - csv
+  exit_codes:
+    success: 0
+    failure: 1
+  golden_input: "meter:2.5"
+
+################################################################################
+code_style:
+  formatter: clang-format
+  formatter_config: .clang-format
+  indent: 4 spaces
+  column_limit: 100
+  naming:
+    types: PascalCase
+    functions: camelCase
+    methods: camelCase
+    variables: camelCase
+    constants: kPascalCase or constexpr in entity namespace
+    namespaces: lower_snake_case
+    test_cases: Catch2 descriptive string literal
+    files: PascalCase matching primary type
+  header_source_separation:
+    principle: declaration in .hpp, definition in .cpp
+    exceptions:
+      - templates and small constexpr in headers only when necessary
+      - inline only for trivial accessors approved in review
+    include_guards: "#pragma once"
+    include_order:
+      - corresponding header first
+      - cstdlib cmath string vector etc
+      - project headers boundary before control before entity
+  modern_cpp:
+    prefer: constexpr, enum class, explicit, override, noexcept where applicable
+    avoid: C-style casts, macros for logic, raw new/delete
+  comments:
+    when: non-obvious business rules and invariant references only
+    avoid: narrating obvious code
+
+################################################################################
+architecture:
+  pattern: boundary_control_entity
+  layers:
+    entity:
+      responsibility: Quantity, UnitId, ConversionRatio, UnitRegistry, UnitConverter, domain errors
+      must_not: iostream, file I/O, JSON parsing, CLI, exit codes
+    control:
+      responsibility: Use-case orchestration — ConvertLength, RegisterUnit, LoadConfig; wires entity ports
+      must_not: parse stdin, format stdout, embed conversion formulas
+    boundary:
+      responsibility: InputParser, InputValidator, OutputFormatter, CliApp, stderr messages, exit codes
+      must_not: duplicate meter normalization math, own conversion ratio constants
+  dependency_direction:
+    - boundary may depend on control
+    - control may depend on entity
+    - boundary may depend on entity only through control interfaces or DTOs
+    - entity depends on nothing outside standard library
+    - tests/tests_entity may include entity only
+    - tests/tests_boundary may mock entity and control
+  design_principles:
+    - single_responsibility_per_class
+    - open_closed_via_registry_and_formatter_strategy
+    - dependency_inversion_at_control_ports
+  contracts:
+    pol_neg:
+      - value must be >= 0; zero allowed
+      - stderr on reject: "Negative value not allowed: {value}"
+    pol_out:
+      - left side of every line preserves input value and unit verbatim
+      - table pattern: "{input_value} {input_unit} = {converted} {target_unit}"
+      - rounding: 4 decimal places half-up on converted values
+
+################################################################################
+tdd_rules:
+  red_phase:
+    description: >
+      Catch2 tests first. Secure RED on entity (conversion, registration, invariants),
+      then boundary (parse, validate, errors, serialization) and config load via contract tests.
+      Implementation only to the minimum extent tests fail.
+    rules:
+      - Add failing tests before production code. Compile failure counts as RED.
+      - Test titles map 1:1 to Catch2 TEST_CASE strings.
+      - Entity tests use no I/O, files, stdout, or stderr.
+      - Boundary tests isolate entity with mocks or fakes.
+      - One test verifies one invariant or one ERR-* code.
+      - Golden values for builtin ratios, meter:2.5 example, and epsilon 1e-4.
+      - Assert exact error message strings and exit codes per docs/PRD.md.
+      - JSON, CSV, table assert schema, row count, order, four-decimal half-up rounding.
+      - Separate success and failure cases for dynamic register, config load, unknown unit, negative, zero.
+      - All RED categories must fail before entering GREEN.
+    must_not:
+      - Write production code before tests.
+      - Weaken expected values, epsilon, or error strings to force GREEN.
+      - Refactor or move many files during RED.
+      - Put cout, cerr, file read, or JSON parser in entity.
+      - Assert multiple unrelated invariants in one test.
+      - Test private implementation details.
+
+  green_phase:
+    description: >
+      Pass RED with minimal code. Prioritize conversion accuracy and input rejection on entity.
+      Boundary and config adapters add only contract-satisfying code. Never reduce passing test count.
+    rules:
+      - Pick one failing test or one invariant group per change; minimal code to pass.
+      - Entity uses meter normalize then convert; no growing per-unit if-else chains.
+      - Add code only in SRP types — Quantity, UnitRegistry, UnitConverter, etc.
+      - Boundary flow stays parse, validate, execute, format; no conversion reimplementation.
+      - Config load separated from entity; InMemory source for unit tests.
+      - Run all affected tests before each GREEN commit.
+      - Keep exit codes and stderr golden strings in GREEN.
+      - After dynamic register, builtin conversion tests must still pass.
+    must_not:
+      - Delete, skip, or DISABLE tests to GREEN.
+      - Start new features while tests still fail.
+      - Change output format, error text, or rounding during GREEN without RED first.
+      - Hardcode ratios in control or boundary.
+      - Add entity tests that depend on real files without isolation.
+      - Leave dead code or unused branches.
+
+  refactor_phase:
+    description: >
+      Improve structure only when all tests GREEN. Align BCE dependency direction;
+      remove duplication, extract interfaces and config loading. Behavior and contracts unchanged.
+    rules:
+      - Test results identical before and after refactor — golden, epsilon, message, order.
+      - No reverse dependency entity to boundary or control.
+      - New units via registry or config entry; minimize Converter edits.
+      - New output formats only via Formatter strategy.
+      - Single conversion path toMeters and fromMeters in entity.
+      - Maintain coverage targets or improve them.
+      - One responsibility per refactor step.
+      - Keep regression tests for builtin ratios, meter:2.5, all ERR-* codes.
+    must_not:
+      - Change public API, error schema, or JSON/CSV schema without tests first.
+      - Add features during refactor.
+      - Change rounding, sort order, or stderr format for style only.
+      - Merge parsing or serialization into entity.
+      - Leave temporary globals or throwaway interfaces.
+      - Bulk rename that breaks Concept-to-Test traceability.
+
+################################################################################
+testing:
+  framework: Catch2
+  framework_version: v3.x
+  layout:
+    entity_tests: tests/entity/
+    boundary_tests: tests/boundary/
+    integration_tests: tests/integration/
+  pattern: AAA
+  aaa_rules:
+    arrange: build registry, DTOs, mocks, and input strings in Arrange only
+    act: single call to function under test or single CLI invocation
+    assert: one logical outcome per test; use Catch2 REQUIRE and CHECK
+  fixtures:
+    builtin_registry: shared fixture loading meter, feet, yard with documented factors
+    empty_registry: fixture with zero units for EmptyRegistry tests
+    temp_config_file: boundary and integration only; RAII delete on scope end
+    mock_converter: boundary tests return fixed ConversionResult without entity math
+  tags:
+    - "[entity]"
+    - "[boundary]"
+    - "[integration]"
+    - "[parsing]"
+    - "[ratio]"
+    - "[serialization]"
+  coverage_targets:
+    entity_line: 95
+    boundary_line: 85
+    boundary_error_paths: 100
+    control_line: 100
+    data_line: 90
+  golden_files:
+    - error message strings per ERR-* code
+    - meter:2.5 table json csv snapshots
+  regression_suite:
+    - builtin ratio invariants 3.28084 and 1.09361
+    - meter:2.5 end-to-end
+    - all ERR-* codes at least once
+    - gherkin GH-01 through GH-08 mapped tests
+
+################################################################################
+forbidden:
+  - pattern: std::cout and std::cerr for debug tracing left in committed code
+    reason: pollutes contract tests and hides real stderr error channel
+    alternative: Catch2 CAPTURE, test assertions, or scoped logger behind boundary only
+
+  - pattern: magic numbers for conversion factors inline in control or boundary
+    reason: violates single source of truth and breaks ratio invariant tests
+    alternative: entity constants, config JSON factor_to_meter, named constexpr kMeterToFeet
+
+  - pattern: catch(...) or catch(...) without rethrow swallowing all exceptions
+    reason: masks InvalidQuantity, UnknownUnit, and config failures
+    alternative: catch specific domain exceptions and map to ERR-* at boundary only
+
+  - pattern: non-template function bodies defined inside .hpp included by multiple TUs
+    reason: ODR violations and hidden compile coupling
+    alternative: declare in .hpp, define in .cpp; templates explicit instantiate in one .cpp if needed
+
+  - pattern: global mutable state for registry, format, or config path
+    reason: test order dependence and race in parallel test runs
+    alternative: inject UnitRegistry and dependencies through control constructors or fixtures
+
+  - pattern: growing if-else chain on unit name string in converter or main
+    reason: breaks OCP; each new unit edits core logic
+    alternative: UnitRegistry register and lookup
+
+  - pattern: including boundary or control headers from entity headers
+    reason: reverses dependency direction and prevents pure domain tests
+    alternative: entity includes only standard library; upward includes forbidden
+
+  - pattern: TEST_CASE without assert or with assert always true
+    reason: false GREEN and zero regression value
+    alternative: one failing assertion minimum in RED; meaningful REQUIRE in GREEN
+
+  - pattern: changing ERR-* stderr text or POL-OUT left pattern without updating golden tests
+    reason: breaks REG-02 and REG-03 per docs/PRD.md section 7.2
+    alternative: RED test first, then implementation, then golden snapshot update in same PR
+
+################################################################################
+file_structure:
+  tree: |
+    project_root/
+    ├── .cursorrules
+    ├── .clang-format
+    ├── CMakeLists.txt
+    ├── README.md
+    ├── docs/
+    │   ├── PRD.md
+    │   ├── TODO.md
+    │   └── requirement.md
+    ├── config/
+    │   └── units.json
+    ├── src/
+    │   ├── boundary/
+    │   │   ├── CliApp.hpp / .cpp
+    │   │   ├── InputParser.hpp / .cpp
+    │   │   ├── InputValidator.hpp / .cpp
+    │   │   ├── OutputFormatter.hpp / .cpp
+    │   │   └── ErrorMessages.hpp
+    │   ├── control/
+    │   │   ├── ConvertLengthUseCase.hpp / .cpp
+    │   │   ├── RegisterUnitUseCase.hpp / .cpp
+    │   │   └── LoadConfigUseCase.hpp / .cpp
+    │   └── entity/
+    │       ├── Quantity.hpp / .cpp
+    │       ├── UnitRegistry.hpp / .cpp
+    │       ├── UnitConverter.hpp / .cpp
+    │       └── DomainError.hpp
+    ├── tests/
+    │   ├── entity/
+    │   ├── boundary/
+    │   └── integration/
+    └── main.cpp
+
+################################################################################
+ai_behavior:
+  workflow:
+    - read docs/PRD.md and docs/TODO.md before coding
+    - write or extend Catch2 test first for every behavior change
+    - implement minimal GREEN on entity before boundary and control
+    - refactor only when user or CI confirms all tests pass
+  layer_discipline:
+    - never place conversion math in boundary or control
+    - never place iostream or file I/O in entity
+    - never include boundary headers from entity
+    - map domain exceptions to ERR-* only in boundary
+  test_first:
+    - no new production function without a failing test title already present
+    - preserve golden strings and exit codes unless tests updated in same change
+    - use meter:2.5 as primary golden input not ad-hoc examples
+  refactor_policy:
+    - refactor only after GREEN
+    - one layer or one class per refactor response
+    - run full test suite after refactor
+  output_discipline:
+    - do not weaken assertions or delete tests to satisfy user hurry
+    - do not add features while RED tests remain
+    - prefer editing existing SRP types over new god files
+  reporting:
+    - when completing a task state which tests were added or pass
+    - cite invariant, ERR-* id, or Gherkin GH-* when changing error or ratio behavior
+  scope:
+    - align with docs/PRD.md v1.0; do not add web UI, REST, or non-length units
