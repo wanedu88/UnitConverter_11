@@ -1,71 +1,432 @@
+# UnitConverter_11
 
-## Unit Converter (C++)
-![unit-converter](./unit-converter.jpg)
-### Overview
-- 사용자가 입력한 길이(`단위:값`)를 기반으로, 해당 값을 다른 모든 단위로 변환해 출력하는 프로그램.
-- 새로운 단위를 추가할 때 기존 코드의 변경이 최소화되도록 설계한다.
-- 각 단위 변환 로직은 테스트 코드로 검증한다.
+**meter 기준 길이 단위 변환 CLI**와 **계약 기반 테스트·BCE 레이어 분리**를 학습하기 위한 C++17 프로젝트 — C++·클린 아키텍처·TDD 학습자를 위해, 단일 파일 변환기를 확장 가능한 구조로 전환하는 것을 목표로 한다.
 
-### 빌드 및 실행
+---
+
+## 목차
+
+- [개요 (Overview)](#개요-overview)
+- [빠른 시작 (Quick Start)](#빠른-시작-quick-start)
+- [지원 단위 및 비율](#지원-단위-및-비율)
+- [입력 형식 계약](#입력-형식-계약)
+- [아키텍처](#아키텍처)
+- [테스트 실행](#테스트-실행)
+- [설정 파일 (JSON/YAML)](#설정-파일-jsonyaml)
+- [출력 포맷](#출력-포맷)
+- [기여 가이드 (Contributing)](#기여-가이드-contributing)
+- [라이선스](#라이선스)
+- [관련 문서](#관련-문서)
+
+---
+
+## 개요 (Overview)
+
+### 이 프로젝트가 해결하는 문제
+
+`unit:value` 한 줄 입력으로 길이를 여러 단위에 동시에 환산해야 한다. 초기 템플릿(`UnitConverter.cpp`)은 **파싱·환산·출력·에러 처리가 한 흐름**에 묶여 있고, 비율이 코드에 고정되어 있으며, 음수 검증·설정 파일·동적 단위·JSON/CSV 출력이 없다. 단위가 늘어날 때 if-else가 커지면 **회귀 없이 안전하게 확장**하기 어렵다.
+
+### 주요 학습 목표
+
+| 원칙 | 학습 내용 |
+|------|-----------|
+| **OCP** | 신규 단위는 Registry·설정·Formatter 추가로 확장; 환산 핵심 분기 확장 금지 |
+| **SRP** | Entity(도메인)·Control(유스케이스)·Boundary(입출력) 책임 분리 |
+| **BCE** | Boundary → Control → Entity 의존 방향; Entity는 I/O 없음 |
+| **TDD** | Catch2 RED→GREEN→refactor; stderr·exit·비율 golden 고정 |
+
+### PRD와의 연결
+
+요구사항·인수 기준·회귀 규칙의 정본은 **[Product Requirements Document (`docs/PRD.md`)](docs/PRD.md)** 이다. 작업 목록은 [`docs/TODO.md`](docs/TODO.md), 초기 실습 요구는 [`docs/requirement.md`](docs/requirement.md)를 참고한다.
+
+---
+
+## 빠른 시작 (Quick Start)
+
+### 사전 조건
+
+| 항목 | 버전 |
+|------|------|
+| C++ 컴파일러 | **C++17** 이상 (g++, clang++, MSVC) |
+| 빌드 (목표 구조) | **CMake** 3.16+ |
+| 테스트 | **Catch2** v3.x |
+| 포맷 (권장) | **clang-format** |
+
+### 빌드 & 실행
+
+**Baseline (현재 템플릿 — 단일 파일):**
+
 ```bash
-g++ -o UnitConverter UnitConverter.cpp
+g++ -std=c++17 -o UnitConverter UnitConverter.cpp
 ./UnitConverter
 ```
 
-### 기본 요구사항
-1. 사용자 입력 예시:
-   ```
-   meter:2.5
-   ```
-   → 출력:
-   ```
-   2.5 meter = 8.2 feet
-   2.5 meter = 2.7 yard
-   ...
-   ```
+**목표 구조 (v1.0 — CMake 도입 후):**
 
-2. 현재 지원 단위:
-   - meter
-   - feet
-   - yard
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+./build/unit_converter
+```
 
-3. 새로운 단위가 추가될 때도 기존 코드의 변경이 최소화되도록 할 것.
+프롬프트 예:
 
-4. 각 단위 간 변환이 정확히 계산되도록 테스트 코드를 작성할 것.
+```text
+Insert value for converting (ex: meter:2.5):
+meter:5.0
+```
 
-### 비즈니스 로직
-- `1 meter = 3.28084 feet`
-- `1 meter = 1.09361 yard`
-- feet/yard 간의 비율은 meter 기반으로 계산.
+### 예시 입출력 (`meter:5.0`)
 
-### 품질 요구사항
-- OCP를 만족하는 설계
-- SRP를 만족하는 클래스 구성
-- 입력 값 검증 (음수, 잘못된 형식, 없는 단위)
+입력:
 
-### 추가 요구사항
-- **설정 외부화**
-   - 변환 비율을 외부 설정 파일(JSON/YAML)에서 로드
-- **동적으로 단위와 비율을 등록할 수 있도록 한다**
-   - 사용자 입력으로 `1 cubit = 0.4572 meter`를 등록하고 사용 가능
-- **출력 포맷 선택 기능** 
-   - JSON / CSV / 표 형태 출력
+```text
+meter:5.0
+```
 
+출력 (table, **POL-OUT**: 좌측 입력 보존, 우측 **소수 4자리 half-up**):
 
-## 생성형AI를 활용한 Activities (6 시간)
+```text
+5.0 meter = 5.0 meter
+5.0 meter = 16.4042 feet
+5.0 meter = 5.4681 yard
+```
 
-1. 문제 코드 및 기본 요구사항 분석 (0.5시간)
-   - 기본 코드구조, 로직 이해
-2. 기본 요구사항 및 품질 요구사항 구현 (2시간)
-   - OCP를 만족하는 인터페이스 구현 
-   - SRP를 만족하도록 클래스 구현 
-   - 입력값 검증을 위한 구현
-3. TC 구현 (0.5시간)
-   - 단위변환 기능 검증 및 입력 값 검증 TC 작성 
-4. 추가 요구사항 구현 (2시간)
-   - 3개 요구사항 구현 및 TC 작성 
-5. 회고 및 발표 (1시간)
-   - 실습 목표와 달성도
-   - AI를 어떻게 활용했나? 도움이 된 순간과 한계는?
-   - TC를 추가해보면서 개선에 미친 영향, TC 작성 팁
-   - 클린코드와 리팩토링에서 느낀 장점과 어려운점
+| 항목 | 값 |
+|------|-----|
+| exit code | `0` |
+| stderr | (비어 있음) |
+
+> README 예시 `8.2` / `2.7`(2.5m 기준)은 반올림 표기 예시이다. **테스트·인수 기준은 PRD §6.1의 4자리 half-up**을 따른다.
+
+---
+
+## 지원 단위 및 비율
+
+**기준 단위(hub):** meter  
+**환산:** `meters = input_value × factor_to_meter(unit)` → `output = meters / factor_to_meter(target)`
+
+| 단위명 | 식별자 | factor_to_meter (1 unit = k meter) | 출처 |
+|--------|--------|-------------------------------------|------|
+| meter | `meter` | 1.0 | PRD §5.1 기준 |
+| feet | `feet` | 0.3048 (= 1 ÷ 3.28084) | `1 meter = 3.28084 feet` |
+| yard | `yard` | 0.9144 (= 1 ÷ 1.09361) | `1 meter = 1.09361 yard` |
+
+**검증 상수 (테스트):**
+
+- `1 meter` → `3.28084 feet` (ε ≤ 1×10⁻⁴)
+- `1 meter` → `1.09361 yard` (ε ≤ 1×10⁻⁴)
+- feet ↔ yard는 **meter 경유만** (독립 비율 하드코딩 금지)
+
+---
+
+## 입력 형식 계약
+
+### 정상 입력 (예시 3개)
+
+| 입력 | 의미 |
+|------|------|
+| `meter:2.5` | 2.5 meter를 모든 등록 단위로 변환 |
+| `feet:3.28084` | 3.28084 feet 입력; 좌측 출력에 `feet`·값 보존 |
+| `yard:0` | 0 yard (음수 아님, **0 허용**) |
+
+**형식 규칙:** `{unit}:{value}` — 콜론 1개, unit `[a-z][a-z0-9_]*` (1~32자).
+
+### 비정상 입력 (예시 3개 + 에러 패턴)
+
+| 입력 | exit | stderr 패턴 |
+|------|------|-------------|
+| `meter2.5` (콜론 없음) | 1 | `Invalid format. Use unit:value (ex: meter:2.5)` |
+| `meter:abc` | 1 | `Invalid number: abc` |
+| `yard:-3` | 1 | `Negative value not allowed: -3` |
+
+**추가 실패 (계약 동일):**
+
+| 조건 | stderr 패턴 |
+|------|-------------|
+| 미등록 단위 `lightyear:1` | `Unknown unit: lightyear` |
+| stdout | **변환 줄 없음** (빈) |
+
+### 음수 정책 (POL-NEG)
+
+| 규칙 | 내용 |
+|------|------|
+| POL-NEG-01 | `value >= 0`; **0 허용** |
+| POL-NEG-02 | 음수 거부 |
+| POL-NEG-03 | 실패 시 exit `1`, stdout 변환 줄 없음 |
+| POL-NEG-04 | `Negative value not allowed: {value}` |
+
+---
+
+## 아키텍처
+
+### BCE 레이어 (Mermaid)
+
+```mermaid
+flowchart TB
+  subgraph Boundary
+    CLI[CliApp]
+    Parser[InputParser]
+    Validator[InputValidator]
+    Formatter[OutputFormatter]
+  end
+  subgraph Control
+    UC1[ConvertLengthUseCase]
+    UC2[RegisterUnitUseCase]
+    UC3[LoadConfigUseCase]
+  end
+  subgraph Entity
+    Reg[UnitRegistry]
+    Conv[UnitConverter]
+    Qty[Quantity]
+  end
+  subgraph Data
+    CFG[ConfigReader / units.json]
+  end
+
+  CLI --> Parser --> Validator --> UC1
+  UC3 --> CFG --> Reg
+  UC2 --> Reg
+  UC1 --> Conv --> Reg
+  UC1 --> Formatter --> CLI
+```
+
+### 의존성 방향
+
+```text
+Boundary  →  Control  →  Entity
+                ↓
+              Data (config load only)
+```
+
+| 레이어 | 책임 | 금지 |
+|--------|------|------|
+| **Entity** | 환산, Registry, Quantity, DomainError | iostream, 파일, JSON, CLI |
+| **Control** | 유스케이스 조율 | 파싱·포맷·환산식 재구현 |
+| **Boundary** | stdin/stdout/stderr, exit code | 환산 상수·if-else 단위 분기 |
+| **Data** | `units.json` 로드 | Domain 규칙 변경 |
+
+### 새 단위 추가 방법 (코드 변경 최소화)
+
+1. **설정 파일** `config/units.json`에 항목 추가  
+   `{ "name": "cubit", "factor_to_meter": 0.4572 }`
+2. **또는 런타임 등록** (한 줄):  
+   `register:cubit:0.4572`
+3. **Registry**에 등록되면 `convertAll`·출력 포맷이 자동으로 대상에 포함
+4. **수정하지 않음:** `UnitConverter` meter 정규화 공식, ERR-* 메시지, POL-OUT 좌측 패턴
+5. **필수:** 기존 builtin golden 테스트(`meter:2.5`, 3.28084, 1.09361) GREEN 유지
+
+**목표 디렉터리:**
+
+```text
+src/boundary/   src/control/   src/entity/
+tests/entity/   tests/boundary/   tests/integration/
+config/units.json
+```
+
+---
+
+## 테스트 실행
+
+### 프레임워크
+
+**Catch2** v3.x — Entity(순수), Boundary(Mock Entity), Integration(E2E).
+
+### 명령
+
+**CMake (목표):**
+
+```bash
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+**또는 Catch2 직접:**
+
+```bash
+./build/tests/unit_converter_tests
+```
+
+**태그 예:**
+
+```bash
+./build/tests/unit_converter_tests "[entity]"
+./build/tests/unit_converter_tests "[boundary][parsing]"
+./build/tests/unit_converter_tests "[integration]"
+```
+
+### 커버리지 목표 (PRD §4.3)
+
+| 레이어 | 라인 커버리지 | 비고 |
+|--------|---------------|------|
+| Entity | **≥ 95%** | 환산·Registry 불변식 |
+| Boundary | **≥ 85%** | ERR-* 8종 각 ≥1 테스트 |
+| Data | **≥ 90%** | config 성공/실패 |
+| Control | **100%** | 유스케이스 메서드 각 호출 |
+
+**인수:** Gherkin GH-01~08 매핑 테스트 전부 GREEN. [`docs/PRD.md` §7.1](docs/PRD.md) AC-01~08 참고.
+
+---
+
+## 설정 파일 (JSON/YAML)
+
+### 위치 및 JSON 형식
+
+**경로:** `config/units.json`
+
+```json
+{
+  "base_unit": "meter",
+  "units": [
+    { "name": "meter", "factor_to_meter": 1.0 },
+    { "name": "feet", "factor_to_meter": 0.3048 },
+    { "name": "yard", "factor_to_meter": 0.9144 }
+  ]
+}
+```
+
+| 실패 조건 | 동작 |
+|-----------|------|
+| 파일 없음 / JSON 구문 오류 | exit `1`, `Config load failed: {reason}` |
+| `factor_to_meter` ≤ 0 | 동일, stdout 변환 줄 없음 |
+
+**YAML:** v2.0 후보(F-10). JSON GREEN 후 동일 스키마 매핑.
+
+### 동적 단위 등록 (PRD §5.3)
+
+**형식 (한 줄):**
+
+```text
+register:{unit_name}:{factor_to_meter}
+```
+
+**예시:**
+
+```text
+register:cubit:0.4572
+```
+
+| 결과 | 기대 |
+|------|------|
+| `cubit:1` | ≈ `1.0 meter` (0.4572 m) |
+| `convertAll` | Registry 단위 수 +1 |
+| builtin 테스트 | `meter:2.5` golden **불변** |
+
+---
+
+## 출력 포맷
+
+공통: **POL-OUT** — 모든 줄·레코드에 **입력 unit·value 원문** 보존.  
+수치: 우측/target **소수 4자리 half-up** (table·json·csv 동일).
+
+### 콘솔 (table) — 기본
+
+```text
+{input_value} {input_unit} = {converted_value} {target_unit}
+```
+
+예 (`meter:2.5`):
+
+```text
+2.5 meter = 2.5 meter
+2.5 meter = 8.2021 feet
+2.5 meter = 2.7340 yard
+```
+
+- 줄 수 = Registry 단위 수  
+- 순서 = 단위명 **사전순(lexicographic)**
+
+### JSON (권장)
+
+```json
+{
+  "input": { "unit": "meter", "value": 2.5 },
+  "conversions": [
+    { "unit": "feet", "value": 8.2021 },
+    { "unit": "meter", "value": 2.5 },
+    { "unit": "yard", "value": 2.7340 }
+  ]
+}
+```
+
+### CSV (권장)
+
+```csv
+source_unit,source_value,target_unit,target_value
+meter,2.5,meter,2.5
+meter,2.5,feet,8.2021
+meter,2.5,yard,2.7340
+```
+
+| 포맷 | 선택 방법 (목표 CLI) |
+|------|----------------------|
+| table | 기본 (옵션 생략) |
+| json | `--format json` |
+| csv | `--format csv` |
+| 미지원 | exit `1`, `Unknown output format: {format}` |
+
+---
+
+## 기여 가이드 (Contributing)
+
+### 계약 변경 금지 원칙 (PRD §7.2)
+
+| ID | 내용 |
+|----|------|
+| REG-01 | builtin 비율 `3.28084` / `1.09361` 변경 시 **테스트 먼저 RED** + 승인 |
+| REG-02 | ERR-* **stderr 전문·exit code** 변경 금지 (golden diff 0) |
+| REG-03 | POL-OUT **좌측 패턴** 변경 금지 |
+| REG-04 | `meter:2.5` E2E golden 유지 |
+| REG-05 | **refactor는 전 테스트 GREEN 이후만** |
+
+### 테스트 없는 PR 거부 정책
+
+- 동작·계약·비율·출력 변경 → **Catch2 테스트 동반 필수**
+- 테스트 삭제·완화·스킵으로 GREEN 맞추기 **금지**
+- Entity 변경 → `[entity]` 테스트; Boundary → Mock 분리 유지
+
+### 커밋 메시지 컨벤션
+
+```text
+<type>(<scope>): <subject>
+
+<body optional>
+```
+
+| type | 용도 |
+|------|------|
+| `feat` | 기능 (F-0x) |
+| `fix` | 계약 버그 |
+| `test` | RED/GREEN 테스트만 |
+| `refactor` | 동작 불변 구조 변경 |
+| `docs` | README, PRD, TODO |
+
+**scope 예:** `entity`, `boundary`, `control`, `config`, `docs`
+
+**예시:**
+
+```text
+test(entity): add ratio golden for 1 meter to feet
+feat(boundary): reject negative input per POL-NEG-04
+docs: align README output rounding with PRD 6.1
+```
+
+---
+
+## 라이선스
+
+**MIT License** — 학습·실습·포크 허용. 상업 사용 시 표준 MIT 조건 준수.
+
+---
+
+## 관련 문서
+
+| 문서 | 설명 |
+|------|------|
+| [docs/PRD.md](docs/PRD.md) | Phase 5 제품 요구사항 정본 |
+| [docs/TODO.md](docs/TODO.md) | v1.0 작업·마일스톤·회귀 체크리스트 |
+| [docs/requirement.md](docs/requirement.md) | 초기 6시간 실습 요구 |
+
+---
+
+*문서만 포함. 구현 코드는 본 README 작성 범위에 추가하지 않는다.*
