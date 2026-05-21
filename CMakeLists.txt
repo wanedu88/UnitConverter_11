@@ -13,11 +13,22 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(UC11_GREEN_PHASE "TDD GREEN: enable real assertions in unit_converter_tests" ON)
+option(UC11_COVERAGE "Enable gcov coverage" OFF)
+
+function(uc11_enable_coverage target_name)
+    if(UC11_COVERAGE)
+        target_compile_options(${target_name} PRIVATE --coverage -fprofile-arcs -ftest-coverage)
+        target_link_options(${target_name} PRIVATE --coverage)
+    endif()
+endfunction()
+
 add_library(uc11_entity
     src/entity/UnitRegistry.cpp
     src/entity/UnitConverter.cpp
 )
 target_include_directories(uc11_entity PUBLIC ${CMAKE_SOURCE_DIR}/src)
+uc11_enable_coverage(uc11_entity)
 
 add_library(uc11_boundary
     src/boundary/InputParser.cpp
@@ -27,8 +38,11 @@ add_library(uc11_boundary
 )
 target_include_directories(uc11_boundary PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(uc11_boundary PUBLIC uc11_entity)
+uc11_enable_coverage(uc11_boundary)
 
 add_executable(unit_converter_legacy UnitConverter.cpp)
+target_link_libraries(unit_converter_legacy PRIVATE uc11_boundary)
+uc11_enable_coverage(unit_converter_legacy)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -37,8 +51,6 @@ FetchContent_Declare(
     GIT_TAG v3.5.4
 )
 FetchContent_MakeAvailable(Catch2)
-
-option(UC11_GREEN_PHASE "TDD GREEN: enable real assertions in unit_converter_tests" OFF)
 
 add_executable(unit_converter_tests
     tests/test_normal_conversion.cpp
@@ -49,6 +61,7 @@ add_executable(unit_converter_tests
     tests/test_boundary_contract.cpp
 )
 target_link_libraries(unit_converter_tests PRIVATE uc11_entity uc11_boundary Catch2::Catch2WithMain)
+uc11_enable_coverage(unit_converter_tests)
 target_include_directories(unit_converter_tests PRIVATE ${CMAKE_SOURCE_DIR}/tests)
 target_compile_definitions(unit_converter_tests PRIVATE UC11_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 if(UC11_GREEN_PHASE)
@@ -64,6 +77,7 @@ add_executable(unit_converter_red_tests
     tests/test_config.cpp
 )
 target_link_libraries(unit_converter_red_tests PRIVATE uc11_entity uc11_boundary Catch2::Catch2WithMain)
+uc11_enable_coverage(unit_converter_red_tests)
 target_compile_definitions(unit_converter_red_tests PRIVATE UC11_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 
 include(CTest)

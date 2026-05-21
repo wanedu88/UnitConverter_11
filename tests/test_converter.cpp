@@ -1,6 +1,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "entity/ConversionConstants.hpp"
 #include "entity/UnitConverter.hpp"
 #include "entity/UnitRegistry.hpp"
 
@@ -11,7 +12,8 @@ TEST_CASE("TC-B-01 convert meter to feet within 1e-5", "[domain][TC-B-01]") {
 
 TEST_CASE("TC-B-02 convert meter to yard within 1e-5", "[domain][TC-B-02]") {
     const uc11::UnitRegistry registry = uc11::UnitRegistry::withBuiltins();
-    REQUIRE(uc11::convert(registry, "meter", 1.0, "yard") == Catch::Approx(1.09361).epsilon(1e-5));
+    REQUIRE(uc11::convert(registry, "meter", 1.0, "yard") ==
+            Catch::Approx(uc11::kMeterToYard).epsilon(1e-5));
 }
 
 TEST_CASE("TC-B-03 convert feet to meter reverse within 1e-5", "[domain][TC-B-03]") {
@@ -25,9 +27,9 @@ TEST_CASE("TC-B-04 convertAll meter returns all registered units", "[domain][TC-
     REQUIRE(results.size() == 3);
     for (const auto& row : results) {
         if (row.unit == "feet") {
-            REQUIRE(row.value == Catch::Approx(3.28084).epsilon(1e-5));
+            REQUIRE(row.value == Catch::Approx(uc11::kMeterToFeet).epsilon(1e-5));
         } else if (row.unit == "yard") {
-            REQUIRE(row.value == Catch::Approx(1.09361).epsilon(1e-5));
+            REQUIRE(row.value == Catch::Approx(uc11::kMeterToYard).epsilon(1e-5));
         } else if (row.unit == "meter") {
             REQUIRE(row.value == Catch::Approx(1.0).epsilon(1e-5));
         }
