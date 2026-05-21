@@ -3,6 +3,7 @@
 /build-mingw/
 /build-ninja/
 /build-cov/
+/build-fresh/
 
 # gcov/lcov local artifacts (project root)
 *.gcov

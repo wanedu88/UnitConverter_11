@@ -30,6 +30,13 @@ add_library(uc11_entity
 target_include_directories(uc11_entity PUBLIC ${CMAKE_SOURCE_DIR}/src)
 uc11_enable_coverage(uc11_entity)
 
+add_library(uc11_bonus
+    src/DecayingUnit.cpp
+)
+target_include_directories(uc11_bonus PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(uc11_bonus PUBLIC uc11_entity)
+uc11_enable_coverage(uc11_bonus)
+
 add_library(uc11_data
     src/data/ConfigLoader.cpp
 )
@@ -77,8 +84,9 @@ add_executable(unit_converter_tests
     tests/test_config_load.cpp
     tests/test_boundary_contract.cpp
     tests/test_golden_master.cpp
+    tests/test_decaying_unit.cpp
 )
-target_link_libraries(unit_converter_tests PRIVATE uc11_entity uc11_boundary uc11_data
+target_link_libraries(unit_converter_tests PRIVATE uc11_entity uc11_boundary uc11_data uc11_bonus
     Catch2::Catch2WithMain)
 add_dependencies(unit_converter_tests unit_converter_legacy)
 uc11_enable_coverage(unit_converter_tests)
@@ -108,8 +116,18 @@ target_compile_definitions(unit_converter_red_tests PRIVATE UC11_SOURCE_DIR="${C
 
 include(CTest)
 include(Catch)
-catch_discover_tests(unit_converter_tests)
-catch_discover_tests(unit_converter_red_tests)
+
+# Catch2 POST_BUILD runs test exe via cmd.exe; MinGW DLLs must be on PATH (fixes 0xc0000139).
+if(WIN32 AND CMAKE_CXX_COMPILER)
+    get_filename_component(UC11_COMPILER_BIN "${CMAKE_CXX_COMPILER}" DIRECTORY)
+endif()
+
+catch_discover_tests(unit_converter_tests
+    DL_PATHS "${UC11_COMPILER_BIN}"
+)
+catch_discover_tests(unit_converter_red_tests
+    DL_PATHS "${UC11_COMPILER_BIN}"
+)
 
 # Golden Master (REG-04): explicit ctest entry for CI / README GM-06
 add_test(
