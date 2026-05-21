@@ -1,5 +1,6 @@
-#include "boundary/ConfigLoader.hpp"
+#include "data/ConfigLoader.hpp"
 
+#include "data/ConfigErrors.hpp"
 #include "entity/UnitRegistry.hpp"
 
 #include <cctype>
@@ -52,7 +53,7 @@ bool parseUnitsFromContent(const std::string& content, UnitRegistry& registry,
 
             const auto factorKey = content.find("factor_to_meter", pos);
             if (factorKey == std::string::npos) {
-                errorMessage = "Config load failed: missing factor_to_meter";
+                errorMessage = ConfigErr::kMissingFactor;
                 return false;
             }
             pos = factorKey + 15;
@@ -65,7 +66,7 @@ bool parseUnitsFromContent(const std::string& content, UnitRegistry& registry,
                 registry.registerUnit(name, factor);
                 pos += consumed;
             } catch (...) {
-                errorMessage = "Config load failed: invalid factor_to_meter";
+                errorMessage = ConfigErr::kInvalidFactor;
                 return false;
             }
             continue;
@@ -74,19 +75,19 @@ bool parseUnitsFromContent(const std::string& content, UnitRegistry& registry,
         pos = nameKey + 6;
         const auto quote1 = content.find('"', pos);
         if (quote1 == std::string::npos) {
-            errorMessage = "Config load failed: malformed name";
+            errorMessage = ConfigErr::kMalformedName;
             return false;
         }
         const auto quote2 = content.find('"', quote1 + 1);
         if (quote2 == std::string::npos) {
-            errorMessage = "Config load failed: malformed name";
+            errorMessage = ConfigErr::kMalformedName;
             return false;
         }
         const std::string name = content.substr(quote1 + 1, quote2 - quote1 - 1);
 
         const auto factorKey = content.find("factor_to_meter", quote2);
         if (factorKey == std::string::npos) {
-            errorMessage = "Config load failed: missing factor_to_meter";
+            errorMessage = ConfigErr::kMissingFactor;
             return false;
         }
         pos = factorKey + 15;
@@ -99,19 +100,19 @@ bool parseUnitsFromContent(const std::string& content, UnitRegistry& registry,
             std::size_t consumed = 0;
             const double factor = std::stod(content.substr(pos), &consumed);
             if (factor <= 0.0) {
-                errorMessage = "Config load failed: factor_to_meter must be positive";
+                errorMessage = ConfigErr::kFactorMustBePositive;
                 return false;
             }
             registry.registerUnit(name, factor);
             pos += consumed;
         } catch (...) {
-            errorMessage = "Config load failed: invalid factor_to_meter";
+            errorMessage = ConfigErr::kInvalidFactor;
             return false;
         }
     }
 
     if (registry.size() == 0) {
-        errorMessage = "Config load failed: no units defined";
+        errorMessage = ConfigErr::kNoUnitsDefined;
         return false;
     }
     return true;
