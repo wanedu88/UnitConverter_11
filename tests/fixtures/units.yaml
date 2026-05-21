@@ -1,0 +1,8 @@
+base_unit: meter
+units:
+  - name: meter
+    factor_to_meter: 1.0
+  - name: feet
+    factor_to_meter: 0.3048
+  - name: yard
+    factor_to_meter: 0.9144
