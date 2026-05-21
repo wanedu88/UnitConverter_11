@@ -8,7 +8,7 @@
 | **단계** | **GREEN** (최소 구현으로 TC·RED assertion 통과) |
 | **선행 보고서** | [02_RED.md](02_RED.md) (RED 48/48 FAIL 정합) |
 | **관련 문서** | [docs/red_tests.md](../docs/red_tests.md), [docs/test_plan.md](../docs/test_plan.md), [docs/defect_list.md](../docs/defect_list.md) |
-| **브랜치** | `A_01` (PR 대상, base: `main`) |
+| **브랜치** | `green` (PR compare → base: `C_11`, 구조: `main` ← `C_11` ← `green`) |
 
 ---
 
@@ -55,7 +55,7 @@ RED 단계에서 고정한 **14개 TC**(TC-A-01~07, TC-B-01~07)와 **Dual-Track 
 | 3 | `ctest` **0 failures** | ✓ 71/71 |
 | 4 | Entity ≥ 95%, Boundary ≥ 85% (lcov) | ✓ |
 | 5 | legacy `main()`에서 변환 로직 제거 | ✓ |
-| 6 | PR `A_01` → `main` 리뷰·머지 준비 | ✓ push 완료 |
+| 6 | PR `green` → `C_11` 리뷰·머지 준비 | ✓ push 완료 |
 
 ### 2.3 범위 외 (본 보고서)
 
@@ -262,18 +262,19 @@ return meters / registry.factorToMeter(toUnit);
 | RED→GREEN assertion | [tests/red_track_*.cpp](../tests/) | 완료 |
 | 비율 상수 | [src/entity/ConversionConstants.hpp](../src/entity/ConversionConstants.hpp) | 완료 |
 | 커버리지 옵션 | [CMakeLists.txt](../CMakeLists.txt) `UC11_COVERAGE` | 완료 |
-| PR 브랜치 | `origin/A_01` | push 완료 |
+| PR 브랜치 | `origin/green` | push 완료 |
 | **본 보고서** | [Report/03_GREEN.md](03_GREEN.md) | 완료 |
 
 ---
 
-## 10. PR 및 머지 (green → A_01)
+## 10. PR 및 머지 (green → C_11)
 
 | 항목 | 내용 |
 |------|------|
-| **브랜치** | `A_01` |
-| **Base** | `main` |
-| **PR 생성** | https://github.com/wanedu88/UnitConverter_11/pull/new/A_01 |
+| **브랜치 구조** | `main` ← `C_11` ← `green` |
+| **Compare (head)** | `green` |
+| **Base** | `C_11` |
+| **PR 생성** | https://github.com/wanedu88/UnitConverter_11/compare/C_11...green |
 | **제목 권장** | `feat(green): Dual-Track TDD GREEN complete (TC-A/B)` |
 
 ### 리뷰 체크리스트
@@ -287,9 +288,10 @@ return meters / registry.factorToMeter(toUnit);
 
 ### 머지 후 권장
 
-1. `main`에 머지 후 `green` 브랜치 동기화  
-2. **REFACTOR** PR 별도 (REG-05: 동작 불변, 테스트 GREEN 유지)  
-3. [Report/04_REFACTOR.md](04_REFACTOR.md) (예정) — Control 레이어·CLI E2E
+1. `green` → `C_11` 머지 후, 필요 시 `C_11` → `main` PR  
+2. `green` 브랜치를 `C_11` 기준으로 동기화  
+3. **REFACTOR** PR 별도 (REG-05: 동작 불변, 테스트 GREEN 유지)  
+4. [Report/04_REFACTOR.md](04_REFACTOR.md) (예정) — Control 레이어·CLI E2E
 
 ---
 
@@ -297,7 +299,7 @@ return meters / registry.factorToMeter(toUnit);
 
 | 순서 | 작업 | 완료 기준 |
 |------|------|-----------|
-| 1 | `A_01` PR 리뷰·머지 | `main` GREEN 반영 |
+| 1 | `green` → `C_11` PR 리뷰·머지 | `C_11`에 GREEN 반영 |
 | 2 | Control/UseCase 추출 (선택) | `main()` 추가 축소 |
 | 3 | `ConfigLoader` 오류 분기 정리 | Boundary lcov 90%+ |
 | 4 | CI `UC11_COVERAGE` gate 스크립트 | PR 실패 시 자동 차단 |
@@ -318,7 +320,7 @@ return meters / registry.factorToMeter(toUnit);
 | 5 | Boundary lcov | ≥ 85% | ☐ |
 | 6 | 비율 인라인 없음 (`src/`, legacy) | 상수만 | ☐ |
 | 7 | legacy `main()` 위임 | 환산식 없음 | ☐ |
-| 8 | PR `A_01` 리뷰 | 승인 | ☐ |
+| 8 | PR `green` → `C_11` 리뷰 | 승인 | ☐ |
 
 ---
 
@@ -327,7 +329,7 @@ return meters / registry.factorToMeter(toUnit);
 - **Dual-Track TDD GREEN**을 커밋 순서표(9+1)에 따라 완료했으며, **TC 14건·ctest 71건·커버리지 게이트**를 충족했다.
 - 변환 비즈니스 로직은 **Entity 허브**로 일원화했고, legacy CLI는 **Boundary API 위임**만 수행한다.
 - 비율 **3.28084 / 1.09361**은 `ConversionConstants.hpp`에만 정의한다.
-- **REFACTOR** 및 CI 게이트 자동화는 `A_01` 머지 이후 단계에서 진행한다.
+- **REFACTOR** 및 CI 게이트 자동화는 `green` → `C_11` 머지 이후 단계에서 진행한다.
 
 ---
 
