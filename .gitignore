@@ -2,3 +2,9 @@
 /build2/
 /build-mingw/
 /build-ninja/
+/build-cov/
+
+# gcov/lcov local artifacts (project root)
+*.gcov
+*.gcda
+*.gcno
