@@ -217,6 +217,7 @@ Entity `UnitRegistry`는 [03_GREEN.md](03_GREEN.md)에서 이미 구현되었다
 | CMake `uc11_bonus` | [CMakeLists.txt](../CMakeLists.txt) | `uc11_entity` 링크 |
 | Bonus RED 보고서 | [Report/06_BONUS_RED.md](06_BONUS_RED.md) | 완료 |
 | **본 보고서** | [Report/07_BONUS_GREEN.md](07_BONUS_GREEN.md) | 완료 |
+| **인수 검증 보고서** | [Report/08_BONUS_VERIFICATION.md](08_BONUS_VERIFICATION.md) | 완료 |
 
 ---
 
@@ -241,7 +242,8 @@ Entity `UnitRegistry`는 [03_GREEN.md](03_GREEN.md)에서 이미 구현되었다
 - **OCP:** 기존 if-else·Item 테이블을 수정하지 않고, Registry에 **cubit만 추가**하는 방식으로 동적 등록을 만족했다.
 - **회귀:** 메인 TDD 트랙(TC-A/B, RED track, Golden Master) **PASS 유지**.
 - 검증: `unit_converter_tests.exe "[bonus]"` → **All tests passed**.
+- **인수 검증(전체 테스트·lcov·Golden Master):** [08_BONUS_VERIFICATION.md](08_BONUS_VERIFICATION.md)
 
 ---
 
-*본 문서는 Bonus GREEN(감쇠 단위) 단계만 기술한다. REFACTOR·CLI 통합은 후속 작업에서 다룬다.*
+*본 문서는 Bonus GREEN(감쇠 단위) 단계만 기술한다. REFACTOR·CLI 통합은 후속 작업에서 다룬다. 인수 검증 상세는 [08_BONUS_VERIFICATION.md](08_BONUS_VERIFICATION.md).*

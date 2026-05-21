@@ -229,6 +229,7 @@ cmake --build build
 | CMake | [CMakeLists.txt](../CMakeLists.txt) | `uc11_entity` 링크 |
 | Report | [Report/07_BONUS_GREEN.md](../Report/07_BONUS_GREEN.md) | 완료 |
 | Prompting | [Prompting/08_BONUS_GREEN.md](08_BONUS_GREEN.md) | 완료 (본 파일) |
+| 인수 검증 Prompting | [Prompting/09_BONUS_VERIFICATION.md](09_BONUS_VERIFICATION.md) | 후속 세션 |
 | Git 커밋 | `db5e32d` | `feat(feature): add registerUnit with OCP registry` |
 
 ---
