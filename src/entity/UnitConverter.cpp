@@ -17,6 +17,9 @@ double convert(const UnitRegistry& registry, const std::string& fromUnit, double
     if (fromUnit == "meter" && toUnit == "yard") {
         return value * kMeterToYard;
     }
+    if (fromUnit == "feet" && toUnit == "meter") {
+        return value * kFeetFactorToMeter;
+    }
     throw std::invalid_argument("Conversion not implemented: " + fromUnit + " -> " + toUnit);
 }
 
