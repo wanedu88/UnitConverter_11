@@ -1,5 +1,7 @@
 #pragma once
 
+#include "entity/UnitRegistry.hpp"
+
 #include <string>
 #include <vector>
 
@@ -23,7 +25,7 @@ public:
     std::vector<DecayingConversionResult> convertAll(const std::string& fromUnit, double value) const;
 
 private:
-    // GREEN: own registry (hub factors to meter); no Item struct coupling.
+    UnitRegistry registry_;
 };
 
 }  // namespace uc11

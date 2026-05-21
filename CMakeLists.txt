@@ -34,6 +34,7 @@ add_library(uc11_bonus
     src/DecayingUnit.cpp
 )
 target_include_directories(uc11_bonus PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(uc11_bonus PUBLIC uc11_entity)
 uc11_enable_coverage(uc11_bonus)
 
 add_library(uc11_data

@@ -1,23 +1,29 @@
 #include "DecayingUnit.hpp"
 
+#include "entity/UnitConverter.hpp"
+
 namespace uc11 {
 
-DecayingUnit::DecayingUnit() = default;
+DecayingUnit::DecayingUnit() : registry_(UnitRegistry::withBuiltins()) {}
 
-void DecayingUnit::registerUnit(const std::string& /*name*/, double /*factorToMeter*/) {
-    // RED stub — GREEN will validate factor > 0 and store in registry.
+void DecayingUnit::registerUnit(const std::string& name, double factorToMeter) {
+    registry_.registerUnit(name, factorToMeter);
 }
 
-double DecayingUnit::convert(const std::string& /*fromUnit*/, double /*value*/,
-                             const std::string& /*toUnit*/) const {
-    // RED stub — GREEN will use meter hub without touching legacy Item table.
-    return 0.0;
+double DecayingUnit::convert(const std::string& fromUnit, double value,
+                             const std::string& toUnit) const {
+    return uc11::convert(registry_, fromUnit, value, toUnit);
 }
 
-std::vector<DecayingConversionResult> DecayingUnit::convertAll(const std::string& /*fromUnit*/,
-                                                               double /*value*/) const {
-    // RED stub — GREEN will return one row per registered unit.
-    return {};
+std::vector<DecayingConversionResult> DecayingUnit::convertAll(const std::string& fromUnit,
+                                                               double value) const {
+    const auto results = uc11::convertAll(registry_, fromUnit, value);
+    std::vector<DecayingConversionResult> rows;
+    rows.reserve(results.size());
+    for (const auto& row : results) {
+        rows.push_back({row.unit, row.value});
+    }
+    return rows;
 }
 
 }  // namespace uc11
