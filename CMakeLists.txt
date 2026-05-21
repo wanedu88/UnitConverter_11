@@ -59,8 +59,9 @@ add_executable(unit_converter_red_tests
     tests/red_track_a_boundary.cpp
     tests/red_track_b_domain.cpp
     tests/test_converter.cpp
+    tests/test_parser.cpp
 )
-target_link_libraries(unit_converter_red_tests PRIVATE uc11_entity Catch2::Catch2WithMain)
+target_link_libraries(unit_converter_red_tests PRIVATE uc11_entity uc11_boundary Catch2::Catch2WithMain)
 
 include(CTest)
 include(Catch)
