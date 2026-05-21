@@ -1,6 +1,7 @@
 #include "entity/UnitRegistry.hpp"
 
 #include "entity/ConversionConstants.hpp"
+#include "entity/DomainErrors.hpp"
 
 #include <stdexcept>
 
@@ -18,13 +19,13 @@ UnitRegistry UnitRegistry::withBuiltins() {
 
 void UnitRegistry::registerUnit(const std::string& name, double factorToMeter) {
     if (name.empty()) {
-        throw std::invalid_argument("Invalid unit name: (empty)");
+        throw std::invalid_argument(DomainErr::kInvalidUnitNameEmpty);
     }
     if (factorToMeter <= 0.0) {
-        throw std::invalid_argument("Unit registration failed: factor_to_meter must be positive");
+        throw std::invalid_argument(DomainErr::kFactorMustBePositive);
     }
     if (factors_.count(name) != 0) {
-        throw std::invalid_argument("Unit registration failed: duplicate unit " + name);
+        throw std::invalid_argument(DomainErr::duplicateUnit(name));
     }
     factors_[name] = factorToMeter;
 }
@@ -36,7 +37,7 @@ bool UnitRegistry::hasUnit(const std::string& name) const {
 double UnitRegistry::factorToMeter(const std::string& name) const {
     auto it = factors_.find(name);
     if (it == factors_.end()) {
-        throw std::invalid_argument("Unknown unit: " + name);
+        throw std::invalid_argument(DomainErr::unknownUnit(name));
     }
     return it->second;
 }

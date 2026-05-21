@@ -1,10 +1,12 @@
 #include "boundary/CliApp.hpp"
 
+#include "boundary/ErrorMessages.hpp"
 #include "boundary/InputParser.hpp"
 #include "boundary/InputValidator.hpp"
 #include "boundary/OutputFormatter.hpp"
 #include "control/ConvertLengthUseCase.hpp"
 
+#include <exception>
 #include <iostream>
 #include <string>
 
@@ -15,6 +17,7 @@ int CliApp::run() {
 
     std::string input;
     if (!std::getline(std::cin, input)) {
+        std::cerr << ErrMsg::kInputReadFailed << std::endl;
         return 1;
     }
 
@@ -28,6 +31,9 @@ int CliApp::run() {
                       << std::endl;
         }
     } catch (const std::invalid_argument& ex) {
+        std::cerr << ex.what() << std::endl;
+        return 1;
+    } catch (const std::exception& ex) {
         std::cerr << ex.what() << std::endl;
         return 1;
     }
