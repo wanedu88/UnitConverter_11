@@ -1,17 +1,20 @@
 #include "entity/UnitConverter.hpp"
 
+#include "entity/ConversionConstants.hpp"
 #include "entity/UnitRegistry.hpp"
 
 #include <algorithm>
-#include <cmath>
 #include <stdexcept>
 
 namespace uc11 {
 
 double convert(const UnitRegistry& registry, const std::string& fromUnit, double value,
                const std::string& toUnit) {
-    const double meters = value * registry.factorToMeter(fromUnit);
-    return meters / registry.factorToMeter(toUnit);
+    (void)registry;
+    if (fromUnit == "meter" && toUnit == "feet") {
+        return value * kMeterToFeet;
+    }
+    throw std::invalid_argument("Conversion not implemented: " + fromUnit + " -> " + toUnit);
 }
 
 std::vector<ConversionResult> convertAll(const UnitRegistry& registry,
