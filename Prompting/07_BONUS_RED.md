@@ -209,4 +209,4 @@ Entity 레이어 cubit 시나리오는 이미 GREEN([03_GREEN.md](03_GREEN.md), 
 
 ---
 
-*본 문서는 Bonus RED 세션(테스트·명령·Report·Prompting) 전체를 기록한다. Bonus GREEN은 후속 세션에서 다룬다.*
+*본 문서는 Bonus RED 세션(테스트·명령·Report·Prompting) 전체를 기록한다. Bonus GREEN은 [08_BONUS_GREEN.md](08_BONUS_GREEN.md)에서 다룬다.*

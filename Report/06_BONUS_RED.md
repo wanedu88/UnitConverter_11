@@ -6,7 +6,7 @@
 | **작성일** | 2026-05-21 |
 | **단계** | **Bonus RED** — `DecayingUnit` 동적 등록 · 실패 assertion 고정 |
 | **선행 보고서** | [02_RED.md](02_RED.md) (Dual-Track RED 48/48), [03_GREEN.md](03_GREEN.md) (Entity GREEN) |
-| **후속** | Bonus GREEN — `src/DecayingUnit.cpp` 구현 (본 문서 범위 외) |
+| **후속** | [07_BONUS_GREEN.md](07_BONUS_GREEN.md) (Bonus GREEN 완료) |
 | **관련 문서** | [README.md](../README.md), [docs/test_plan.md](../docs/test_plan.md) |
 
 ---
@@ -209,4 +209,4 @@ Entity 레이어의 `UnitRegistry::registerUnit` / `convert`는 이미 GREEN([03
 
 ---
 
-*본 문서는 Bonus RED(감쇠 단위) 단계만 기술한다. Bonus GREEN 인수는 후속 보고서에서 다룬다.*
+*본 문서는 Bonus RED(감쇠 단위) 단계만 기술한다. Bonus GREEN 인수는 [07_BONUS_GREEN.md](07_BONUS_GREEN.md)에서 다룬다.*
