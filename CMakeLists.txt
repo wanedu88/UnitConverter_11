@@ -30,6 +30,13 @@ add_library(uc11_entity
 target_include_directories(uc11_entity PUBLIC ${CMAKE_SOURCE_DIR}/src)
 uc11_enable_coverage(uc11_entity)
 
+add_library(uc11_control
+    src/control/ConvertLengthUseCase.cpp
+)
+target_include_directories(uc11_control PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(uc11_control PUBLIC uc11_entity)
+uc11_enable_coverage(uc11_control)
+
 add_library(uc11_boundary
     src/boundary/InputParser.cpp
     src/boundary/InputValidator.cpp
@@ -42,7 +49,7 @@ uc11_enable_coverage(uc11_boundary)
 
 add_executable(unit_converter_legacy UnitConverter.cpp)
 set_target_properties(unit_converter_legacy PROPERTIES OUTPUT_NAME UnitConverter)
-target_link_libraries(unit_converter_legacy PRIVATE uc11_boundary)
+target_link_libraries(unit_converter_legacy PRIVATE uc11_boundary uc11_control)
 uc11_enable_coverage(unit_converter_legacy)
 
 include(FetchContent)
@@ -81,8 +88,10 @@ add_executable(unit_converter_red_tests
     tests/test_parser.cpp
     tests/test_boundary.cpp
     tests/test_config.cpp
+    tests/test_control_convert_length.cpp
 )
-target_link_libraries(unit_converter_red_tests PRIVATE uc11_entity uc11_boundary Catch2::Catch2WithMain)
+target_link_libraries(unit_converter_red_tests PRIVATE uc11_entity uc11_boundary uc11_control
+    Catch2::Catch2WithMain)
 uc11_enable_coverage(unit_converter_red_tests)
 target_compile_definitions(unit_converter_red_tests PRIVATE UC11_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 

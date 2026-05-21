@@ -1,7 +1,7 @@
 #include "boundary/InputParser.hpp"
 #include "boundary/InputValidator.hpp"
 #include "boundary/OutputFormatter.hpp"
-#include "entity/UnitRegistry.hpp"
+#include "control/ConvertLengthUseCase.hpp"
 
 #include <iostream>
 #include <string>
@@ -17,9 +17,9 @@ int main() {
     try {
         const uc11::ParsedInput parsed = uc11::parseInputLine(input);
         uc11::validateInput(parsed);
-        const uc11::UnitRegistry registry = uc11::UnitRegistry::withBuiltins();
-        const auto results = uc11::convertAll(registry, parsed.unit, parsed.value);
-        for (const auto& row : results) {
+        const uc11::ConvertLengthResult result =
+            uc11::ConvertLengthUseCase{}.execute(parsed.unit, parsed.value);
+        for (const auto& row : result.conversions) {
             std::cout << uc11::formatTableLine(parsed.value, parsed.unit, row.value, row.unit)
                       << std::endl;
         }
