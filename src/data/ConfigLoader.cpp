@@ -1,6 +1,6 @@
-#include "boundary/ConfigLoader.hpp"
+#include "data/ConfigLoader.hpp"
 
-#include "boundary/ConfigErrors.hpp"
+#include "data/ConfigErrors.hpp"
 #include "entity/UnitRegistry.hpp"
 
 #include <cctype>

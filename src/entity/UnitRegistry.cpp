@@ -30,6 +30,10 @@ void UnitRegistry::registerUnit(const std::string& name, double factorToMeter) {
     factors_[name] = factorToMeter;
 }
 
+void UnitRegistry::registerUnit(const ConversionRule& rule) {
+    registerUnit(rule.name, rule.factorToMeter);
+}
+
 bool UnitRegistry::hasUnit(const std::string& name) const {
     return factors_.count(name) != 0;
 }

@@ -30,18 +30,26 @@ add_library(uc11_entity
 target_include_directories(uc11_entity PUBLIC ${CMAKE_SOURCE_DIR}/src)
 uc11_enable_coverage(uc11_entity)
 
+add_library(uc11_data
+    src/data/ConfigLoader.cpp
+)
+target_include_directories(uc11_data PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(uc11_data PUBLIC uc11_entity)
+uc11_enable_coverage(uc11_data)
+
 add_library(uc11_control
     src/control/ConvertLengthUseCase.cpp
+    src/control/LoadConfigUseCase.cpp
+    src/control/RegisterUnitUseCase.cpp
 )
 target_include_directories(uc11_control PUBLIC ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(uc11_control PUBLIC uc11_entity)
+target_link_libraries(uc11_control PUBLIC uc11_entity uc11_data)
 uc11_enable_coverage(uc11_control)
 
 add_library(uc11_boundary
     src/boundary/CliApp.cpp
     src/boundary/InputParser.cpp
     src/boundary/InputValidator.cpp
-    src/boundary/ConfigLoader.cpp
     src/boundary/OutputFormatter.cpp
 )
 target_include_directories(uc11_boundary PUBLIC ${CMAKE_SOURCE_DIR}/src)
@@ -70,7 +78,8 @@ add_executable(unit_converter_tests
     tests/test_boundary_contract.cpp
     tests/test_golden_master.cpp
 )
-target_link_libraries(unit_converter_tests PRIVATE uc11_entity uc11_boundary Catch2::Catch2WithMain)
+target_link_libraries(unit_converter_tests PRIVATE uc11_entity uc11_boundary uc11_data
+    Catch2::Catch2WithMain)
 add_dependencies(unit_converter_tests unit_converter_legacy)
 uc11_enable_coverage(unit_converter_tests)
 target_include_directories(unit_converter_tests PRIVATE ${CMAKE_SOURCE_DIR}/tests)
@@ -90,8 +99,9 @@ add_executable(unit_converter_red_tests
     tests/test_boundary.cpp
     tests/test_config.cpp
     tests/test_control_convert_length.cpp
+    tests/test_control_use_cases.cpp
 )
-target_link_libraries(unit_converter_red_tests PRIVATE uc11_entity uc11_boundary uc11_control
+target_link_libraries(unit_converter_red_tests PRIVATE uc11_entity uc11_boundary uc11_control uc11_data
     Catch2::Catch2WithMain)
 uc11_enable_coverage(unit_converter_red_tests)
 target_compile_definitions(unit_converter_red_tests PRIVATE UC11_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
