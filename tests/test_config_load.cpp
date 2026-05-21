@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "TestPhase.hpp"
+
 #include "boundary/ConfigLoader.hpp"
 #include "entity/ConversionConstants.hpp"
 #include "entity/UnitConverter.hpp"
@@ -23,6 +25,7 @@ std::string sourcePath(const std::string& relative) {
 }  // namespace
 
 TEST_CASE("test_load_json_valid_feet_factor", "[boundary][config]") {
+    uc11_require_green_phase();
     // Given: config/units.json with feet factor_to_meter 0.3048 (1 m = 3.28084 ft)
     uc11::UnitRegistry registry;
     std::string error;
@@ -38,6 +41,7 @@ TEST_CASE("test_load_json_valid_feet_factor", "[boundary][config]") {
 }
 
 TEST_CASE("test_load_json_missing_file_defaults", "[boundary][config]") {
+    uc11_require_green_phase();
     // Given: non-existent path; expect builtin 3.28084 / 1.09361
     uc11::UnitRegistry registry;
     std::string error;
@@ -55,6 +59,7 @@ TEST_CASE("test_load_json_missing_file_defaults", "[boundary][config]") {
 }
 
 TEST_CASE("test_load_yaml_valid_units", "[boundary][config]") {
+    uc11_require_green_phase();
     // Given: YAML fixture with same ratios
     uc11::UnitRegistry registry;
     std::string error;
@@ -69,6 +74,7 @@ TEST_CASE("test_load_yaml_valid_units", "[boundary][config]") {
 }
 
 TEST_CASE("test_load_json_invalid_syntax_fails", "[boundary][config]") {
+    uc11_require_green_phase();
     // Given: broken JSON file
     uc11::UnitRegistry registry;
     std::string error;
@@ -82,6 +88,7 @@ TEST_CASE("test_load_json_invalid_syntax_fails", "[boundary][config]") {
 }
 
 TEST_CASE("test_load_json_zero_factor_fails", "[boundary][config]") {
+    uc11_require_green_phase();
     // Given: factor_to_meter = 0
     uc11::UnitRegistry registry;
     std::string error;
@@ -95,6 +102,7 @@ TEST_CASE("test_load_json_zero_factor_fails", "[boundary][config]") {
 }
 
 TEST_CASE("test_load_missing_then_meter_to_yard_still_works", "[boundary][config]") {
+    uc11_require_green_phase();
     // Given: missing config → defaults; 1 meter = 1.09361 yard
     uc11::UnitRegistry registry;
     std::string error;

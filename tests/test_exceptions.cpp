@@ -1,5 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include "TestPhase.hpp"
+
 #include "boundary/InputParser.hpp"
 #include "boundary/InputValidator.hpp"
 #include "entity/UnitConverter.hpp"
@@ -15,6 +17,7 @@ uc11::UnitRegistry builtinRegistry() { return uc11::UnitRegistry::withBuiltins()
 }  // namespace
 
 TEST_CASE("test_parse_no_colon_invalid_format", "[boundary][exception]") {
+    uc11_require_green_phase();
     // Given: input without ':' separator
     const std::string input = "meter2.5";
 
@@ -28,6 +31,7 @@ TEST_CASE("test_parse_no_colon_invalid_format", "[boundary][exception]") {
 }
 
 TEST_CASE("test_parse_meter_abc_invalid_number", "[boundary][exception]") {
+    uc11_require_green_phase();
     // Given: non-numeric value token
     const std::string input = "meter:abc";
 
@@ -41,6 +45,7 @@ TEST_CASE("test_parse_meter_abc_invalid_number", "[boundary][exception]") {
 }
 
 TEST_CASE("test_validate_meter_neg1_negative_not_allowed", "[boundary][exception]") {
+    uc11_require_green_phase();
     // Given: parsed negative value (POL-NEG)
     uc11::ParsedInput input{"meter", -1.0};
 
@@ -54,6 +59,7 @@ TEST_CASE("test_validate_meter_neg1_negative_not_allowed", "[boundary][exception
 }
 
 TEST_CASE("test_convert_parsec_unknown_unit", "[boundary][exception]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 3.28084 feet; parsec not in registry
     const auto registry = builtinRegistry();
 
@@ -67,6 +73,7 @@ TEST_CASE("test_convert_parsec_unknown_unit", "[boundary][exception]") {
 }
 
 TEST_CASE("test_parse_feet_123_malformed_decimal", "[boundary][exception]") {
+    uc11_require_green_phase();
     // Given: multiple decimal points in value
     const std::string input = "feet:1.2.3";
 
@@ -75,6 +82,7 @@ TEST_CASE("test_parse_feet_123_malformed_decimal", "[boundary][exception]") {
 }
 
 TEST_CASE("test_register_duplicate_cubit_fails", "[boundary][exception]") {
+    uc11_require_green_phase();
     // Given: cubit already registered
     auto registry = builtinRegistry();
     registry.registerUnit("cubit", 0.4572);

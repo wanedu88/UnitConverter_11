@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "TestPhase.hpp"
+
 #include "boundary/InputParser.hpp"
 #include "boundary/InputValidator.hpp"
 #include "boundary/OutputFormatter.hpp"
@@ -13,6 +15,7 @@
 using Catch::Matchers::WithinAbs;
 
 TEST_CASE("test_parse_meter_25_happy_returns_dto", "[boundary][contract]") {
+    uc11_require_green_phase();
     // Given: valid input meter:2.5
     const std::string input = "meter:2.5";
 
@@ -26,6 +29,7 @@ TEST_CASE("test_parse_meter_25_happy_returns_dto", "[boundary][contract]") {
 }
 
 TEST_CASE("test_happy_meter_25_convert_feet_returns", "[boundary][contract]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 3.28084 feet; parsed meter:2.5
     const auto registry = uc11::UnitRegistry::withBuiltins();
     const auto parsed = uc11::parseInputLine("meter:2.5");
@@ -39,6 +43,7 @@ TEST_CASE("test_happy_meter_25_convert_feet_returns", "[boundary][contract]") {
 }
 
 TEST_CASE("test_format_preserves_input_left_meter_25", "[boundary][contract]") {
+    uc11_require_green_phase();
     // Given: POL-OUT — left side preserves input; 1 meter = 3.28084 feet
     const auto registry = uc11::UnitRegistry::withBuiltins();
     const double feet = uc11::convert(registry, "meter", 2.5, "feet");
@@ -52,6 +57,7 @@ TEST_CASE("test_format_preserves_input_left_meter_25", "[boundary][contract]") {
 }
 
 TEST_CASE("test_parse_meter_0_boundary_valid", "[boundary][contract]") {
+    uc11_require_green_phase();
     // Given: zero allowed (POL-NEG-01)
     const auto parsed = uc11::parseInputLine("meter:0");
 
@@ -65,6 +71,7 @@ TEST_CASE("test_parse_meter_0_boundary_valid", "[boundary][contract]") {
 }
 
 TEST_CASE("test_validate_meter_neg10_throws", "[boundary][contract]") {
+    uc11_require_green_phase();
     // Given: meter:-1.0
     const auto parsed = uc11::parseInputLine("meter:-1.0");
 
@@ -73,6 +80,7 @@ TEST_CASE("test_validate_meter_neg10_throws", "[boundary][contract]") {
 }
 
 TEST_CASE("test_parse_parsec_unknown_on_convert", "[boundary][contract]") {
+    uc11_require_green_phase();
     // Given: parsec:1.0 parses but unit unknown in registry
     const auto parsed = uc11::parseInputLine("parsec:1.0");
     uc11::validateInput(parsed);

@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "TestPhase.hpp"
+
 #include "entity/ConversionConstants.hpp"
 #include "entity/UnitConverter.hpp"
 #include "entity/UnitRegistry.hpp"
@@ -17,6 +19,7 @@ uc11::UnitRegistry builtinRegistry() { return uc11::UnitRegistry::withBuiltins()
 }  // namespace
 
 TEST_CASE("test_meter_to_feet_value_0_returns_0", "[entity][boundary]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 3.28084 feet; value = 0 (POL-NEG zero allowed)
     const auto registry = builtinRegistry();
 
@@ -28,6 +31,7 @@ TEST_CASE("test_meter_to_feet_value_0_returns_0", "[entity][boundary]") {
 }
 
 TEST_CASE("test_meter_to_yard_value_0_returns_0", "[entity][boundary]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 1.09361 yard; value = 0
     const auto registry = builtinRegistry();
 
@@ -39,6 +43,7 @@ TEST_CASE("test_meter_to_yard_value_0_returns_0", "[entity][boundary]") {
 }
 
 TEST_CASE("test_meter_to_feet_large_value_1e100_finite", "[entity][boundary]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 3.28084 feet; very large input
     const auto registry = builtinRegistry();
     constexpr double large = 1e100;
@@ -52,6 +57,7 @@ TEST_CASE("test_meter_to_feet_large_value_1e100_finite", "[entity][boundary]") {
 }
 
 TEST_CASE("test_meter_to_feet_precision_6decimals", "[entity][boundary]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 3.28084 feet; input with 6 decimal places
     const auto registry = builtinRegistry();
     constexpr double input = 1.123456;
@@ -65,6 +71,7 @@ TEST_CASE("test_meter_to_feet_precision_6decimals", "[entity][boundary]") {
 }
 
 TEST_CASE("test_convert_all_meter_zero_all_zero", "[entity][boundary]") {
+    uc11_require_green_phase();
     // Given: builtin registry; value = 0
     const auto registry = builtinRegistry();
 
@@ -79,6 +86,7 @@ TEST_CASE("test_convert_all_meter_zero_all_zero", "[entity][boundary]") {
 }
 
 TEST_CASE("test_meter_to_feet_value_000001_micro", "[entity][boundary]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 3.28084 feet; tiny positive value
     const auto registry = builtinRegistry();
     constexpr double tiny = 1e-6;

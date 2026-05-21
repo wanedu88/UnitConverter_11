@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "TestPhase.hpp"
+
 #include "entity/ConversionConstants.hpp"
 #include "entity/UnitConverter.hpp"
 #include "entity/UnitRegistry.hpp"
@@ -14,6 +16,7 @@ uc11::UnitRegistry builtinRegistry() { return uc11::UnitRegistry::withBuiltins()
 }  // namespace
 
 TEST_CASE("test_meter_to_feet_value_25_returns_82021", "[entity][normal]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 3.28084 feet
     const auto registry = builtinRegistry();
 
@@ -25,6 +28,7 @@ TEST_CASE("test_meter_to_feet_value_25_returns_82021", "[entity][normal]") {
 }
 
 TEST_CASE("test_meter_to_yard_value_1_returns_109361", "[entity][normal]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 1.09361 yard
     const auto registry = builtinRegistry();
 
@@ -36,6 +40,7 @@ TEST_CASE("test_meter_to_yard_value_1_returns_109361", "[entity][normal]") {
 }
 
 TEST_CASE("test_feet_to_meter_value_1_returns_030480", "[entity][normal]") {
+    uc11_require_green_phase();
     // Given: 1 feet = 0.3048 meter (1/3.28084); inverse of 1 meter = 3.28084 feet
     const auto registry = builtinRegistry();
 
@@ -47,6 +52,7 @@ TEST_CASE("test_feet_to_meter_value_1_returns_030480", "[entity][normal]") {
 }
 
 TEST_CASE("test_meter_to_feet_value_1_matches_ratio_328084", "[entity][normal]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 3.28084 feet (golden ratio)
     const auto registry = builtinRegistry();
 
@@ -58,6 +64,7 @@ TEST_CASE("test_meter_to_feet_value_1_matches_ratio_328084", "[entity][normal]")
 }
 
 TEST_CASE("test_meter_to_yard_value_25_returns_27340", "[entity][normal]") {
+    uc11_require_green_phase();
     // Given: 1 meter = 1.09361 yard
     const auto registry = builtinRegistry();
 
@@ -69,6 +76,7 @@ TEST_CASE("test_meter_to_yard_value_25_returns_27340", "[entity][normal]") {
 }
 
 TEST_CASE("test_feet_to_yard_via_meter_matches_indirect", "[entity][normal]") {
+    uc11_require_green_phase();
     // Given: feet↔yard only via meter hub; 1 meter = 3.28084 feet, 1 meter = 1.09361 yard
     const auto registry = builtinRegistry();
 

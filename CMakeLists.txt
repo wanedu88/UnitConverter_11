@@ -38,6 +38,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
+option(UC11_GREEN_PHASE "TDD GREEN: enable real assertions in unit_converter_tests" OFF)
+
 add_executable(unit_converter_tests
     tests/test_normal_conversion.cpp
     tests/test_boundary_values.cpp
@@ -47,7 +49,11 @@ add_executable(unit_converter_tests
     tests/test_boundary_contract.cpp
 )
 target_link_libraries(unit_converter_tests PRIVATE uc11_entity uc11_boundary Catch2::Catch2WithMain)
+target_include_directories(unit_converter_tests PRIVATE ${CMAKE_SOURCE_DIR}/tests)
 target_compile_definitions(unit_converter_tests PRIVATE UC11_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+if(UC11_GREEN_PHASE)
+    target_compile_definitions(unit_converter_tests PRIVATE UC11_GREEN_PHASE=1)
+endif()
 
 add_executable(unit_converter_red_tests
     tests/red_track_a_boundary.cpp

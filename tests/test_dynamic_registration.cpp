@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "TestPhase.hpp"
+
 #include "entity/ConversionConstants.hpp"
 #include "entity/UnitConverter.hpp"
 #include "entity/UnitRegistry.hpp"
@@ -8,6 +10,7 @@
 using Catch::Matchers::WithinAbs;
 
 TEST_CASE("test_register_cubit_then_meter_convert", "[entity][dynamic]") {
+    uc11_require_green_phase();
     // Given: 1 cubit = 0.4572 meter (dynamic registration)
     auto registry = uc11::UnitRegistry::withBuiltins();
     registry.registerUnit("cubit", 0.4572);
@@ -20,6 +23,7 @@ TEST_CASE("test_register_cubit_then_meter_convert", "[entity][dynamic]") {
 }
 
 TEST_CASE("test_register_cubit_convertall_includes_cubit", "[entity][dynamic]") {
+    uc11_require_green_phase();
     // Given: cubit registered; 1 meter = 3.28084 feet unchanged
     auto registry = uc11::UnitRegistry::withBuiltins();
     registry.registerUnit("cubit", 0.4572);
@@ -40,6 +44,7 @@ TEST_CASE("test_register_cubit_convertall_includes_cubit", "[entity][dynamic]") 
 }
 
 TEST_CASE("test_register_two_units_increases_count", "[entity][dynamic]") {
+    uc11_require_green_phase();
     // Given: empty beyond builtins
     auto registry = uc11::UnitRegistry::withBuiltins();
     const auto before = registry.size();
@@ -53,6 +58,7 @@ TEST_CASE("test_register_two_units_increases_count", "[entity][dynamic]") {
 }
 
 TEST_CASE("test_register_cubit_factor_exact_ratio", "[entity][dynamic]") {
+    uc11_require_green_phase();
     // Given: cubit factor 0.4572 meter per cubit
     auto registry = uc11::UnitRegistry::withBuiltins();
     registry.registerUnit("cubit", 0.4572);
@@ -66,6 +72,7 @@ TEST_CASE("test_register_cubit_factor_exact_ratio", "[entity][dynamic]") {
 }
 
 TEST_CASE("test_register_invalid_zero_factor_throws", "[entity][dynamic]") {
+    uc11_require_green_phase();
     // Given: invalid factor
     auto registry = uc11::UnitRegistry::withBuiltins();
 
@@ -74,6 +81,7 @@ TEST_CASE("test_register_invalid_zero_factor_throws", "[entity][dynamic]") {
 }
 
 TEST_CASE("test_register_cubit_meter_to_feet_golden_unchanged", "[entity][dynamic]") {
+    uc11_require_green_phase();
     // Given: cubit added; builtin 1 meter = 3.28084 feet
     auto registry = uc11::UnitRegistry::withBuiltins();
     registry.registerUnit("cubit", 0.4572);

@@ -3,7 +3,8 @@ _Exported on 2026-05-21 from Cursor agent session (UnitConverter_11 workspace)_
 
 **워크스페이스:** `c:\DEV\UnitConverter_11`  
 **선행 문서:** [01_spec.md](01_spec.md) (문제 정의·Phase 4~5 설계 대화)  
-**본 세션 주제:** 테스트 계획 · Catch2 · Dual-Track RED · 결함 문서 · 보고서
+**본 세션 주제:** 테스트 계획 · Catch2 · Dual-Track RED · ctest 48/48 정합 · 결함 · 보고서 · GitHub  
+**최종 갱신:** 2026-05-21 (Prompting 재저장)
 
 ---
 
@@ -11,16 +12,20 @@ _Exported on 2026-05-21 from Cursor agent session (UnitConverter_11 workspace)_
 
 | 단계 | 사용자 요청 (요지) | 산출물 | 비고 |
 |------|-------------------|--------|------|
-| 1 | README/PRD 기준 샘플 예제 1개 선택 (코드 금지) | 선택 결과 문서 (응답) | `meter:2.5` → feet `8.2021` |
-| 2 | test_plan.md 작성 (Catch2, 경계, gcov) | [docs/test_plan.md](../docs/test_plan.md) | 시니어 QA 리드 |
-| 3 | README에 RED To-Do 리스트 섹션 삽입 | [README.md](../README.md) § RED | Track A/B, 커버리지, 결함 연결 |
-| 4 | Catch2 테스트 작성 (타입별 ≥5, Green) | `src/entity/*`, `src/boundary/*`, `tests/test_*.cpp`, `CMakeLists.txt` | **36/36 PASS** |
-| 5 | 빌드 실패 로그 분석 (로그 미첨부) | 결함 분석 응답 (DEF-001 등) | `expected 8.202100 but got 0.000000` |
-| 6 | defect_list.md 정리 | [docs/defect_list.md](../docs/defect_list.md) | DEF-001~018 |
-| 7 | Dual-Track RED 명세만 (구현/GREEN/REFACTOR 금지) | [docs/red_tests.md](../docs/red_tests.md) | 12 시나리오 |
-| 8 | Catch2 스켈레톤 `FAIL("RED")` only | `tests/red_track_*.cpp`, `unit_converter_red_tests` | **12/12 FAIL** |
-| 9 | Report/02_RED.md | [Report/02_RED.md](../Report/02_RED.md) | RED 단계 보고서 |
-| 10 | Prompting에 대화 저장 | 본 파일 | |
+| 1 | README/PRD 기준 샘플 예제 1개 선택 (코드 금지) | 선택 결과 (응답) | `meter:2.5` → feet `8.2021` |
+| 2 | test_plan.md 작성 | [docs/test_plan.md](../docs/test_plan.md) | Catch2, gcov, 경계 6종 |
+| 3 | README RED To-Do 리스트 삽입 | [README.md](../README.md) § RED | Track A/B |
+| 4 | Catch2 테스트 (타입별 ≥5, Green) | `src/*`, `tests/test_*.cpp`, CMake | 조기 GREEN 36건 |
+| 5 | 결함 분석 (로그 placeholder) | DEF-001 분석 응답 | 8.202100 vs 0.0 |
+| 6 | defect_list.md | [docs/defect_list.md](../docs/defect_list.md) | DEF-001~018 |
+| 7 | Dual-Track RED 명세 (구현 금지) | [docs/red_tests.md](../docs/red_tests.md) | RED-A/B 각 6 |
+| 8 | Catch2 스켈레톤 `FAIL("RED")` | `red_track_*.cpp` | 12건 |
+| 9 | Report/02_RED.md (초안) | [Report/02_RED.md](../Report/02_RED.md) | RED 보고서 |
+| 10 | Prompting 저장 (1차) | `02_session_red_tdd.md` → 본 파일 통합 | |
+| 11 | **GitHub 저장** | `git push origin red` 커밋 `9becfe0` | 34 files |
+| 12 | **ctest 48 중 12만 FAIL** — RED는 48/48 FAIL? | 원인 분석 + **조치** | §10 참조 |
+| 13 | Report 디렉토리 보고서 | [Report/02_RED.md](../Report/02_RED.md) 개정 | §4.3 48/48 |
+| 14 | Prompting 저장 (2차) | 본 파일 갱신 | 현재 턴 |
 
 ---
 
@@ -97,9 +102,35 @@ TEST_CASE + FAIL("RED") 한 줄만
 Report/02_RED.md
 ```
 
-### Turn 10 — Prompting 저장
+### Turn 10 — Prompting 저장 (1차)
 ```
 Prompting에 현재까지 대화내용 저장
+→ 02_session_red_tdd.md (이후 02_RED.md로 통합)
+```
+
+### Turn 11 — GitHub push
+```
+깃허브에 저장해줘
+→ branch red, commit 9becfe0, origin/red
+```
+
+### Turn 12 — ctest 48/48 RED 정합
+```
+48개 중 12개만 fail — RED는 48개 모두 fail이어야 함
+→ TestPhase.hpp + UC11_GREEN_PHASE=OFF (기본)
+→ ctest: 0% passed, 48 failed out of 48
+```
+
+### Turn 13 — Report 작성
+```
+Report 디렉토리에 보고서
+→ Report/02_RED.md 개정 (이슈·조치·체크리스트)
+```
+
+### Turn 14 — Prompting 저장 (2차)
+```
+Prompting에 현재까지 대화내용 저장
+→ 본 파일 전체 갱신
 ```
 
 ---
@@ -151,18 +182,27 @@ tests/red_track_b_domain.cpp     # 6 × FAIL("RED")  [red][domain]
 target: unit_converter_red_tests  # Catch2 only, 12 failed
 ```
 
-### 3.4 빌드·테스트 (Windows)
+### 3.4 RED 가드 — ctest 48/48 (Turn 12)
+
+```text
+tests/TestPhase.hpp          → uc11_require_green_phase() → FAIL("RED")
+tests/test_*.cpp (36건)      → TEST_CASE 첫 줄에 가드
+CMakeLists.txt               → option(UC11_GREEN_PHASE OFF)
+```
+
+### 3.5 빌드·테스트 (Windows)
 
 ```powershell
 cmake -G Ninja -S . -B build
 cmake --build build
 ctest --test-dir build --output-on-failure
 
-# GREEN
-unit_converter_tests.exe     → 36/36 PASS
+# RED (기본, UC11_GREEN_PHASE=OFF)
+ctest --test-dir build         → 0% passed, 48/48 FAIL
 
-# RED
-unit_converter_red_tests.exe → 12/12 FAIL ("RED")
+# GREEN (36만)
+cmake -B build -DUC11_GREEN_PHASE=ON && cmake --build build
+ctest --test-dir build         → 36 PASS, 12 FAIL (red_track)
 ```
 
 CMake: Win32에서 `g++` 자동 탐지 추가.
@@ -215,18 +255,38 @@ CMake: Win32에서 `g++` 자동 탐지 추가.
 
 **README 결함 체크:**
 - [x] defect_list.md
-- [x] Catch2 36/36 (Entity 경로)
-- [ ] legacy Open 4건
+- [x] Catch2 회귀 (GREEN 모드 36 PASS)
+- [x] RED 모드 ctest 48/48 FAIL
+- [ ] legacy Open 4건 (DEF-003·004·010·013)
+
+**Git:** `origin/red` @ `9becfe0` — feat(red): Dual-Track TDD stack…
 
 ---
 
 ## 7. 미완료 / GREEN 진입 시 할 일
 
-1. `red_track_*.cpp`에서 `FAIL("RED")` → 실제 assertion 교체  
-2. JSON formatter (RED-A-06) 구현  
-3. legacy `UnitConverter.cpp` DEF-003·004·010·013 또는 deprecated  
-4. `03_GREEN.md` 보고서 (권장)  
-5. gcov Entity ≥95%, Boundary ≥85% CI 게이트  
+1. `-DUC11_GREEN_PHASE=ON` → `test_*.cpp` 36/36 PASS 확인  
+2. `red_track_*.cpp`에서 `FAIL("RED")` → 실제 assertion (12건)  
+3. JSON formatter (RED-A-06) 구현  
+4. legacy `UnitConverter.cpp` DEF-003·004·010·013 또는 deprecated  
+5. [Report/03_GREEN.md](../Report/03_GREEN.md) (권장)  
+6. gcov Entity ≥95%, Boundary ≥85% CI 게이트  
+
+## 10. ctest 48/48 이슈 (Turn 12 상세)
+
+| 항목 | 내용 |
+|------|------|
+| **관찰** | `ctest` 48 tests: **36 passed**, **12 failed** |
+| **기대** | RED 단계: **48 failed** |
+| **원인** | Turn 4에서 Entity/Boundary 구현 + `test_*.cpp`에 실제 `REQUIRE` → 조기 GREEN |
+| **오해** | 12개만 `red_track` 스켈레톤 FAIL; 나머지 36은 구현 통과 |
+| **조치** | `TestPhase.hpp` + `UC11_GREEN_PHASE` 기본 OFF |
+| **검증** | `0% tests passed, 48 tests failed out of 48` |
+
+## 11. Report · README 연동 (Turn 13)
+
+- [Report/02_RED.md](../Report/02_RED.md): §4.3 이슈/조치, §11 QA 체크리스트  
+- [README.md](../README.md) 관련 문서: `Report/02_RED.md` 링크 추가  
 
 ---
 
@@ -250,4 +310,14 @@ CMake: Win32에서 `g++` 자동 탐지 추가.
 
 ---
 
-*본 파일은 에이전트 세션의 요청·응답·산출물을 요약한다. 전체 턴 원문은 Cursor chat export가 아니며, 재현·GREEN 작업 시 [docs/red_tests.md](../docs/red_tests.md)와 RED 스켈레톤을 정본으로 사용한다.*
+## 12. Prompting 파일 안내
+
+| 파일 | 용도 |
+|------|------|
+| [01_spec.md](01_spec.md) | Phase 4~5 문제정의·설계 대화 export |
+| **02_RED.md** (본 파일) | RED/TDD/QA 세션 전체 요약 (Turn 1~14) |
+| [02_session_red_tdd.md](02_session_red_tdd.md) | (선행) 1차 저장 — 내용 본 파일에 통합 |
+
+---
+
+*본 파일은 Cursor 에이전트 세션 Turn 1~14의 요청·응답·산출물 요약이다. RED 재현: `UC11_GREEN_PHASE=OFF` + `ctest`. GREEN: `-DUC11_GREEN_PHASE=ON`. 정본 명세: [docs/red_tests.md](../docs/red_tests.md).*

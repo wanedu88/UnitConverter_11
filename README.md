@@ -464,7 +464,9 @@ docs: align README output rounding with PRD 6.1
 | [docs/requirement.md](docs/requirement.md) | 초기 6시간 실습 요구 |
 | [docs/test_plan.md](docs/test_plan.md) | 테스트 계획서 (RED 체크리스트 출처) |
 | [docs/defect_list.md](docs/defect_list.md) | RED/QA 결함 목록 (DEF-001~) |
+| [Report/02_RED.md](Report/02_RED.md) | RED 단계 보고서 (ctest 48/48 FAIL) |
 | [docs/red_tests.md](docs/red_tests.md) | Dual-Track UI/Logic RED 명세 |
+| [Prompting/02_RED.md](Prompting/02_RED.md) | RED/TDD 세션 대화 기록 (Turn 1~14) |
 
 ---
 
