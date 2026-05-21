@@ -13,6 +13,7 @@
 - [아키텍처](#아키텍처)
 - [테스트 실행](#테스트-실행)
 - [RED 단계 To-Do 리스트](#red-단계-to-do-리스트)
+- [Golden Master 회귀 안전장치](#golden-master-회귀-안전장치)
 - [설정 파일 (JSON/YAML)](#설정-파일-jsonyaml)
 - [출력 포맷](#출력-포맷)
 - [기여 가이드 (Contributing)](#기여-가이드-contributing)
@@ -301,6 +302,49 @@ ctest --test-dir build --output-on-failure
 - [x] [defect_list.md](docs/defect_list.md) 생성 및 발견 결함 기록
 - [x] Catch2 회귀 테스트 통과 (36/36, Entity/Boundary 경로)
 - [ ] legacy `UnitConverter.cpp` Open 결함 수정 (DEF-003·004·010·013, 목록 참고)
+
+---
+
+## Golden Master 회귀 안전장치
+
+> Refactoring 시작 전 구축. GREEN 완료 후 즉시 적용.
+
+### 기준 파일 생성
+- [x] GM-01: golden_master_expected.txt 생성 (meter:2.5 기준 출력)
+- [x] GM-02: feet:1.0 / yard:1.0 / meter:0.0 시나리오 추가
+- [x] GM-03: git add tests/golden_master_expected.txt (버전 관리 포함)
+
+### 테스트 코드
+- [x] GM-04: test_golden_master.cpp + golden_master_expected.txt 작성
+- [x] GM-05: approve 패턴 적용 (파일 없으면 생성, 있으면 비교)
+- [x] GM-06: CMake: `add_test(NAME GoldenMaster …)` → `ctest -R GoldenMaster` PASS
+
+### CI 연동
+- [x] GM-07: `.github/workflows/golden_master.yml` 작성
+- [ ] GM-08: PR 머지 차단 (required status check) 설정 — [설정 방법](#gm-08-github-required-check)
+- [x] GM-09: Golden Master 재실행 → PASS 확인 (`ctest -R GoldenMaster`)
+
+#### GM-08: GitHub required check
+
+Repository **Settings → Branches → Branch protection rule** (대상: `main` / `C_11`):
+
+1. **Require status checks to pass before merging** 활성화
+2. Required checks에 **`Golden Master (REG-04)`** 추가 (workflow job 이름)
+3. PR에서 Actions 탭에 Green 확인 후 머지
+
+로컬 검증:
+
+```bash
+cmake --build build --target unit_converter_legacy unit_converter_tests
+cd build && ctest -R GoldenMaster --output-on-failure
+```
+
+기준 파일 재생성:
+
+```bash
+./tests/scripts/generate_golden_master.sh build UnitConverter
+git add tests/golden_master_expected.txt
+```
 
 ---
 

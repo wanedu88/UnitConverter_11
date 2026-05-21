@@ -41,6 +41,7 @@ target_link_libraries(uc11_boundary PUBLIC uc11_entity)
 uc11_enable_coverage(uc11_boundary)
 
 add_executable(unit_converter_legacy UnitConverter.cpp)
+set_target_properties(unit_converter_legacy PROPERTIES OUTPUT_NAME UnitConverter)
 target_link_libraries(unit_converter_legacy PRIVATE uc11_boundary)
 uc11_enable_coverage(unit_converter_legacy)
 
@@ -59,11 +60,16 @@ add_executable(unit_converter_tests
     tests/test_dynamic_registration.cpp
     tests/test_config_load.cpp
     tests/test_boundary_contract.cpp
+    tests/test_golden_master.cpp
 )
 target_link_libraries(unit_converter_tests PRIVATE uc11_entity uc11_boundary Catch2::Catch2WithMain)
+add_dependencies(unit_converter_tests unit_converter_legacy)
 uc11_enable_coverage(unit_converter_tests)
 target_include_directories(unit_converter_tests PRIVATE ${CMAKE_SOURCE_DIR}/tests)
-target_compile_definitions(unit_converter_tests PRIVATE UC11_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_compile_definitions(unit_converter_tests PRIVATE
+    UC11_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    UC11_LEGACY_EXE="$<TARGET_FILE:unit_converter_legacy>"
+)
 if(UC11_GREEN_PHASE)
     target_compile_definitions(unit_converter_tests PRIVATE UC11_GREEN_PHASE=1)
 endif()
@@ -84,3 +90,10 @@ include(CTest)
 include(Catch)
 catch_discover_tests(unit_converter_tests)
 catch_discover_tests(unit_converter_red_tests)
+
+# Golden Master (REG-04): explicit ctest entry for CI / README GM-06
+add_test(
+    NAME GoldenMaster
+    COMMAND unit_converter_tests "golden_master_cli_stdout_approval"
+)
+set_tests_properties(GoldenMaster PROPERTIES LABELS "golden;REG-04;integration")
