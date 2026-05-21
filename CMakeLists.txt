@@ -38,18 +38,19 @@ target_link_libraries(uc11_control PUBLIC uc11_entity)
 uc11_enable_coverage(uc11_control)
 
 add_library(uc11_boundary
+    src/boundary/CliApp.cpp
     src/boundary/InputParser.cpp
     src/boundary/InputValidator.cpp
     src/boundary/ConfigLoader.cpp
     src/boundary/OutputFormatter.cpp
 )
 target_include_directories(uc11_boundary PUBLIC ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(uc11_boundary PUBLIC uc11_entity)
+target_link_libraries(uc11_boundary PUBLIC uc11_entity uc11_control)
 uc11_enable_coverage(uc11_boundary)
 
 add_executable(unit_converter_legacy UnitConverter.cpp)
 set_target_properties(unit_converter_legacy PROPERTIES OUTPUT_NAME UnitConverter)
-target_link_libraries(unit_converter_legacy PRIVATE uc11_boundary uc11_control)
+target_link_libraries(unit_converter_legacy PRIVATE uc11_boundary)
 uc11_enable_coverage(unit_converter_legacy)
 
 include(FetchContent)
