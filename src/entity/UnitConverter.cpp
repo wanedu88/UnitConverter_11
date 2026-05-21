@@ -10,7 +10,12 @@ namespace uc11 {
 
 double convert(const UnitRegistry& registry, const std::string& fromUnit, double value,
                const std::string& toUnit) {
-    (void)registry;
+    if (!registry.hasUnit(fromUnit)) {
+        throw std::invalid_argument("Unknown unit: " + fromUnit);
+    }
+    if (!registry.hasUnit(toUnit)) {
+        throw std::invalid_argument("Unknown unit: " + toUnit);
+    }
     if (fromUnit == "meter" && toUnit == "feet") {
         return value * kMeterToFeet;
     }

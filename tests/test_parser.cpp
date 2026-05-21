@@ -2,9 +2,24 @@
 
 #include "boundary/InputParser.hpp"
 #include "boundary/InputValidator.hpp"
+#include "entity/UnitConverter.hpp"
+#include "entity/UnitRegistry.hpp"
 
 #include <stdexcept>
 #include <string>
+
+TEST_CASE("TC-A-04 unknown unit throws invalid_argument", "[boundary][TC-A-04]") {
+    const uc11::ParsedInput parsed = uc11::parseInputLine("parsec:1.0");
+    uc11::validateInput(parsed);
+    const uc11::UnitRegistry registry = uc11::UnitRegistry::withBuiltins();
+    REQUIRE_THROWS_AS(uc11::convert(registry, parsed.unit, parsed.value, "feet"),
+                      std::invalid_argument);
+    try {
+        uc11::convert(registry, parsed.unit, parsed.value, "feet");
+    } catch (const std::invalid_argument& ex) {
+        REQUIRE(std::string(ex.what()).find("Unknown unit: parsec") != std::string::npos);
+    }
+}
 
 TEST_CASE("TC-A-03 validate negative value throws invalid_argument", "[boundary][TC-A-03]") {
     const uc11::ParsedInput parsed = uc11::parseInputLine("meter:-1.0");
