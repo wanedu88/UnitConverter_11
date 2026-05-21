@@ -1,9 +1,9 @@
 #include "entity/UnitConverter.hpp"
 
+#include "entity/ConversionConstants.hpp"
 #include "entity/UnitRegistry.hpp"
 
 #include <algorithm>
-#include <cmath>
 #include <stdexcept>
 
 namespace uc11 {
